@@ -3,6 +3,7 @@ from tkinter.font import Font
 import pymysql
 from tkinter import *
 from datetime import date
+from tkinter import messagebox
 
 conn = pymysql.connect(host='localhost',user='root',passwd='',database='student',port=3307)
 cur = conn.cursor()
@@ -14,7 +15,22 @@ def change():
     ndate = dateEntry.get()
     global thedate
     thedate = ndate
-    redisplay(ndate)
+
+    ls = ndate.split('-')
+    temp = False
+    if len(ls) == 3:
+        if len(ls[0]) == 4:
+            if len(ls[1]) > 0 and len(ls[1]) < 3 :
+                if len(ls[2]) > 0 and len(ls[2]) < 3 :
+                    try:
+                        a,b,c = int(ls[0]),int(ls[1]),int(ls[2])
+                        temp = True
+                    except ValueError:
+                        temp = False
+    if not temp:
+        messagebox.showerror('Error','Wrong Date format !!!\nGive the date in the format \'YYYY-MM-DD\'')
+    else:
+        redisplay(ndate)
 
 def refresh():
     l = len(table)
@@ -38,10 +54,8 @@ def absentFunc(usn):
     cur.execute('select count(*) from attendance where (day = \'{}\' and usn = \'{}\')'.format(thedate,usn))
     for each in cur:
         if each[0] == 1:
-            print('Here')
             cur.execute('update attendance set presence = 0 where (usn = \'{}\' and day = \'{}\')'.format(usn,thedate))
         else:
-            print('select count(*) from attendance where (day = \'{}\' and usn = \'{}\')'.format(usn,thedate))
             cur.execute('insert into attendance values(\'{}\',\'{}\',{})'.format(thedate,usn,0))    
     conn.commit()
     redisplay(thedate)
@@ -96,7 +110,7 @@ dateEntry.grid(row=2,column=2,columnspan=2,sticky='nsew')
 change = Button(root,text='Change',font=Font(size=20),command=change).grid(row=2,column=4,sticky='snew')
 
 #register = Button(root,text='Register',font=Font(size=20),command=register).grid(row=3,column=2,sticky='nsew')
-refresh = Button(root,text='Refresh',font=Font(size=20),command=lambda:redisplay(thedate)).grid(row=3,column=2,columnspan=2,sticky='')
+#refresh = Button(root,text='Refresh',font=Font(size=20),command=lambda:redisplay(thedate)).grid(row=3,column=2,columnspan=2,sticky='')
 
 spacer1 = Label(root,text='',font=Font(size=20)).grid(row=4,column=0)
 
@@ -208,8 +222,6 @@ def redisplay(date):
 thedate = today
 initStudents()
 display(thedate)
-
-
 
 root.title('Attendance Register')
 root.resizable(False,False)
