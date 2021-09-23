@@ -223,6 +223,8 @@ thedate = today
 initStudents()
 display(thedate)
 
+dateEntry.insert(END,today)
+
 root.title('Attendance Register')
 root.resizable(False,False)
 root.mainloop()
